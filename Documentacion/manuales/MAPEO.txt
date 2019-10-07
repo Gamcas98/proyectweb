@@ -1,0 +1,234 @@
+
+drop schema control_revistas;
+CREATE SCHEMA IF NOT EXISTS `CONTROL_REVISTAS` DEFAULT CHARACTER SET utf8 ;
+USE `CONTROL_REVISTAS` ;
+
+-- -----------------------------------------------------
+-- Table `CONTROL_REVISTAS`.`Usuario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `CONTROL_REVISTAS`.`Usuario` (
+  `Usuario` VARCHAR(30) NOT NULL,
+  `Contrasena` VARCHAR(45) NOT NULL,
+  `Tipo` INT NOT NULL,
+  PRIMARY KEY (`Usuario`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `CONTROL_REVISTAS`.`Perfil`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `CONTROL_REVISTAS`.`Perfil` (
+  `Nombre` VARCHAR(40) NULL,
+  `Apellido` VARCHAR(45) NULL,
+  `Descripcion` VARCHAR(200) NULL,
+  `Gustos` VARCHAR(200) NULL,
+  `Foto` BLOB NULL,
+  `Hobbies` VARCHAR(200) NULL,
+  `Usuario` VARCHAR(30) NOT NULL,
+  INDEX `fk_Perfil_Usuario_idx` (`Usuario` ASC) VISIBLE,
+  PRIMARY KEY (`Usuario`),
+  CONSTRAINT `fk_Perfil_Usuario`
+    FOREIGN KEY (`Usuario`)
+    REFERENCES `CONTROL_REVISTAS`.`Usuario` (`Usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `CONTROL_REVISTAS`.`Revista`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `CONTROL_REVISTAS`.`Revista` (
+  `Autor` VARCHAR(30) NOT NULL,
+  `Nombre` VARCHAR(45) NOT NULL,
+  `Fecha_Publicacion` DATE NULL,
+  `cuota_suscripcion` INT NULL,
+  `Categoria` VARCHAR(45) NULL,
+  `Descripcion` VARCHAR(200) NULL,
+  `is_comentable` VARCHAR(5) NULL,
+  `is_suscribable` VARCHAR(5) NULL,
+  `is_likeable` VARCHAR(5) NULL,
+  `Costo` INT NULL,
+`pdf` BLOB NULL,
+  INDEX `fk_Revista_Usuario1_idx` (`Autor` ASC) VISIBLE,
+  PRIMARY KEY (`Nombre`, `Autor`),
+  CONSTRAINT `fk_Revista_Usuario1`
+    FOREIGN KEY (`Autor`)
+    REFERENCES `CONTROL_REVISTAS`.`Usuario` (`Usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `CONTROL_REVISTAS`.`Suscripcion`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `CONTROL_REVISTAS`.`Suscripcion` (
+  `Usuario_Usuario` VARCHAR(30) NOT NULL,
+  `fecha_de_inicio` DATE NULL,
+  `Estado` VARCHAR(10) NULL,
+  `Revista_Nombre` VARCHAR(45) NOT NULL,
+  INDEX `fk_Suscripcion_Usuario1_idx` (`Usuario_Usuario` ASC) VISIBLE,
+  PRIMARY KEY (`Usuario_Usuario`, `Revista_Nombre`),
+  INDEX `fk_Suscripcion_Revista1_idx` (`Revista_Nombre` ASC) VISIBLE,
+  CONSTRAINT `fk_Suscripcion_Usuario1`
+    FOREIGN KEY (`Usuario_Usuario`)
+    REFERENCES `CONTROL_REVISTAS`.`Usuario` (`Usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Suscripcion_Revista1`
+    FOREIGN KEY (`Revista_Nombre`)
+    REFERENCES `CONTROL_REVISTAS`.`Revista` (`Nombre`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `CONTROL_REVISTAS`.`Comentario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `CONTROL_REVISTAS`.`Comentario` (
+  `Usuario_Usuario` VARCHAR(30) NOT NULL,
+  `Fecha` DATE NOT NULL,
+  `Revista_Nombre` VARCHAR(45) NOT NULL,
+  `id_comentario` INT NOT NULL,
+  INDEX `fk_Comentario_Usuario1_idx` (`Usuario_Usuario` ASC) VISIBLE,
+  PRIMARY KEY (`Usuario_Usuario`, `Revista_Nombre`, `id_comentario`),
+  INDEX `fk_Comentario_Revista1_idx` (`Revista_Nombre` ASC) VISIBLE,
+  CONSTRAINT `fk_Comentario_Usuario1`
+    FOREIGN KEY (`Usuario_Usuario`)
+    REFERENCES `CONTROL_REVISTAS`.`Usuario` (`Usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Comentario_Revista1`
+    FOREIGN KEY (`Revista_Nombre`)
+    REFERENCES `CONTROL_REVISTAS`.`Revista` (`Nombre`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `CONTROL_REVISTAS`.`Pago`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `CONTROL_REVISTAS`.`Pago` (
+  `pago` INT NULL,
+  `fecha_pago` DATE NULL,
+  `id` INT NOT NULL,
+  `Suscripcion_Usuario_Usuario` VARCHAR(30) NOT NULL,
+  `Suscripcion_Revista_Nombre` VARCHAR(45) NOT NULL,
+  `pago_sistema` INT NULL,
+  PRIMARY KEY (`id`, `Suscripcion_Revista_Nombre`, `Suscripcion_Usuario_Usuario`),
+  INDEX `fk_Pago_Suscripcion1_idx` (`Suscripcion_Usuario_Usuario` ASC, `Suscripcion_Revista_Nombre` ASC) VISIBLE,
+  CONSTRAINT `fk_Pago_Suscripcion1`
+    FOREIGN KEY (`Suscripcion_Usuario_Usuario` , `Suscripcion_Revista_Nombre`)
+    REFERENCES `CONTROL_REVISTAS`.`Suscripcion` (`Usuario_Usuario` , `Revista_Nombre`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `CONTROL_REVISTAS`.`Etiqueta`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `CONTROL_REVISTAS`.`Etiqueta` (
+  `Nombre` VARCHAR(30) NOT NULL,
+  PRIMARY KEY (`Nombre`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `CONTROL_REVISTAS`.`Etiquetas_Asignadas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `CONTROL_REVISTAS`.`Etiquetas_Asignadas` (
+  `Etiqueta_Nombre` VARCHAR(30) NOT NULL,
+  `Revista_Nombre` VARCHAR(45) NOT NULL,
+  INDEX `fk_Etiquetas_Asignadas_Etiqueta1_idx` (`Etiqueta_Nombre` ASC) VISIBLE,
+  PRIMARY KEY (`Etiqueta_Nombre`, `Revista_Nombre`),
+  INDEX `fk_Etiquetas_Asignadas_Revista1_idx` (`Revista_Nombre` ASC) VISIBLE,
+  CONSTRAINT `fk_Etiquetas_Asignadas_Etiqueta1`
+    FOREIGN KEY (`Etiqueta_Nombre`)
+    REFERENCES `CONTROL_REVISTAS`.`Etiqueta` (`Nombre`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Etiquetas_Asignadas_Revista1`
+    FOREIGN KEY (`Revista_Nombre`)
+    REFERENCES `CONTROL_REVISTAS`.`Revista` (`Nombre`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `CONTROL_REVISTAS`.`Costo_por_dia`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `CONTROL_REVISTAS`.`Costo_por_dia` (
+  `Revista_Nombre` VARCHAR(45) NOT NULL,
+  `costo` INT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  INDEX `fk_Costo_por_dia_Revista1_idx` (`Revista_Nombre` ASC) VISIBLE,
+  PRIMARY KEY (`id`, `Revista_Nombre`),
+  CONSTRAINT `fk_Costo_por_dia_Revista1`
+    FOREIGN KEY (`Revista_Nombre`)
+    REFERENCES `CONTROL_REVISTAS`.`Revista` (`Nombre`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `CONTROL_REVISTAS`.`costo_global`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `CONTROL_REVISTAS`.`costo_global` (
+  `costo_por_dia` INT NOT NULL,
+  `fecha` DATE NOT NULL)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `CONTROL_REVISTAS`.`Likes`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `CONTROL_REVISTAS`.`Likes` (
+  `Usuario_Usuario` VARCHAR(30) NOT NULL,
+  `Revista_Nombre` VARCHAR(45) NOT NULL,
+  INDEX `fk_Likes_Usuario1_idx` (`Usuario_Usuario` ASC) VISIBLE,
+  PRIMARY KEY (`Usuario_Usuario`, `Revista_Nombre`),
+  INDEX `fk_Likes_Revista1_idx` (`Revista_Nombre` ASC) VISIBLE,
+  CONSTRAINT `fk_Likes_Usuario1`
+    FOREIGN KEY (`Usuario_Usuario`)
+    REFERENCES `CONTROL_REVISTAS`.`Usuario` (`Usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Likes_Revista1`
+    FOREIGN KEY (`Revista_Nombre`)
+    REFERENCES `CONTROL_REVISTAS`.`Revista` (`Nombre`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `CONTROL_REVISTAS`.`Volumen`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `CONTROL_REVISTAS`.`Volumen` (
+  `Revista_Nombre` VARCHAR(45) NOT NULL,
+  `pdf` BLOB NULL,
+  INDEX `fk_Volume.n_Revista1_idx` (`Revista_Nombre` ASC) VISIBLE,
+  PRIMARY KEY (`Revista_Nombre`, `pdf`),
+  CONSTRAINT `fk_Volumen_Revista1`
+    FOREIGN KEY (`Revista_Nombre`)
+    REFERENCES `CONTROL_REVISTAS`.`Revista` (`Nombre`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `CONTROL_REVISTAS`.`Porcentaje_Cobros`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `CONTROL_REVISTAS`.`Porcentaje_Cobros` (
+  `porcentaje` INT NULL,
+  `fecha` DATE NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
